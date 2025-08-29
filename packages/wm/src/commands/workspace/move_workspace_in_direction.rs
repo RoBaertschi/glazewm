@@ -23,8 +23,7 @@ pub fn move_workspace_in_direction(
   if let Some(target_monitor) = target_monitor {
     // Get currently displayed workspace on the target monitor.
     let displayed_workspace = target_monitor
-      .displayed_workspace()
-      .context("No displayed workspace.")?;
+      .displayed_workspace();
 
     move_container_within_tree(
       &workspace.clone().into(),
@@ -50,8 +49,11 @@ pub fn move_workspace_in_direction(
     state
       .pending_sync
       .queue_cursor_jump()
-      .queue_container_to_redraw(workspace.clone())
-      .queue_container_to_redraw(displayed_workspace);
+      .queue_container_to_redraw(workspace.clone());
+
+    if let Some(displayed_workspace) = displayed_workspace {
+      state.pending_sync.queue_container_to_redraw(displayed_workspace.clone());
+    }
 
     match origin_monitor.child_count() {
       0 => {

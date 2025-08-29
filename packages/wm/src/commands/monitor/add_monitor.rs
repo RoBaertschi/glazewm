@@ -91,9 +91,7 @@ pub fn move_workspace_to_monitor(
   let origin_monitor = workspace.monitor().context("No monitor.")?;
 
   // Get currently displayed workspace on the target monitor.
-  let displayed_workspace = target_monitor
-    .displayed_workspace()
-    .context("No displayed workspace.")?;
+  let displayed_workspace = target_monitor.displayed_workspace();
 
   move_container_within_tree(
     &workspace.clone().into(),
@@ -116,10 +114,11 @@ pub fn move_workspace_to_monitor(
     );
   }
 
-  state
-    .pending_sync
-    .queue_container_to_redraw(workspace.clone())
-    .queue_container_to_redraw(displayed_workspace);
+  state.pending_sync.queue_container_to_redraw(workspace.clone());
+
+  if let Some(displayed_workspace) = displayed_workspace {
+    state.pending_sync.queue_container_to_redraw(displayed_workspace);
+  }
 
   match origin_monitor.child_count() {
     0 => {
